@@ -11,77 +11,79 @@ class RCTVideoManager: RCTViewManager {
         return bridge.uiManager.methodQueue
     }
 
-    @objc(save:reactTag:resolver:rejecter:)
-    func save(options: NSDictionary, reactTag: NSNumber, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
-        bridge.uiManager.prependUIBlock { _, viewRegistry in
-            let view = viewRegistry?[reactTag]
-            if !(view is RCTVideo) {
-                RCTLogError("Invalid view returned from registry, expecting RCTVideo, got: %@", String(describing: view))
-            } else if let view = view as? RCTVideo {
-                view.save(options: options, resolve: resolve, reject: reject)
+    func performOnVideoView(withReactTag reactTag: NSNumber, callback: @escaping (RCTVideo?) -> Void) {
+        DispatchQueue.main.async { [weak self] in
+            guard let self else {
+                callback(nil)
+                return
             }
+
+            let view = self.bridge.uiManager.view(forReactTag: reactTag)
+
+            guard let videoView = view as? RCTVideo else {
+                DebugLog("Invalid view returned from registry, expecting RCTVideo, got: \(String(describing: self.view))")
+                callback(nil)
+                return
+            }
+
+            callback(videoView)
         }
     }
 
-    @objc(setLicenseResult:licenseUrl:reactTag:)
-    func setLicenseResult(license: NSString, licenseUrl: NSString, reactTag: NSNumber) {
-        bridge.uiManager.prependUIBlock { _, viewRegistry in
-            let view = viewRegistry?[reactTag]
-            if !(view is RCTVideo) {
-                RCTLogError("Invalid view returned from registry, expecting RCTVideo, got: %@", String(describing: view))
-            } else if let view = view as? RCTVideo {
-                view.setLicenseResult(license as String, licenseUrl as String)
-            }
-        }
+    @objc(seekCmd:time:tolerance:)
+    func seekCmd(_ reactTag: NSNumber, time: NSNumber, tolerance: NSNumber) {
+        performOnVideoView(withReactTag: reactTag, callback: { videoView in
+            videoView?.setSeek(time, tolerance)
+        })
     }
 
-    @objc(setLicenseResultError:licenseUrl:reactTag:)
-    func setLicenseResultError(error: NSString, licenseUrl: NSString, reactTag: NSNumber) {
-        bridge.uiManager.prependUIBlock { _, viewRegistry in
-            let view = viewRegistry?[reactTag]
-            if !(view is RCTVideo) {
-                RCTLogError("Invalid view returned from registry, expecting RCTVideo, got: %@", String(describing: view))
-            } else if let view = view as? RCTVideo {
-                view.setLicenseResultError(error as String, licenseUrl as String)
-            }
-        }
+    @objc(setLicenseResultCmd:license:licenseUrl:)
+    func setLicenseResultCmd(_ reactTag: NSNumber, license: NSString, licenseUrl: NSString) {
+        performOnVideoView(withReactTag: reactTag, callback: { videoView in
+            videoView?.setLicenseResult(license as String, licenseUrl as String)
+        })
     }
 
-    @objc(dismissFullscreenPlayer:)
-    func dismissFullscreenPlayer(_ reactTag: NSNumber) {
-        bridge.uiManager.prependUIBlock { _, viewRegistry in
-            let view = viewRegistry?[reactTag]
-            if !(view is RCTVideo) {
-                RCTLogError("Invalid view returned from registry, expecting RCTVideo, got: %@", String(describing: view))
-            } else if let view = view as? RCTVideo {
-                view.dismissFullscreenPlayer()
-            }
-        }
+    @objc(setLicenseResultErrorCmd:error:licenseUrl:)
+    func setLicenseResultErrorCmd(_ reactTag: NSNumber, error: NSString, licenseUrl: NSString) {
+        performOnVideoView(withReactTag: reactTag, callback: { videoView in
+            videoView?.setLicenseResultError(error as String, licenseUrl as String)
+        })
     }
 
-    @objc(presentFullscreenPlayer:)
-    func presentFullscreenPlayer(_ reactTag: NSNumber) {
-        bridge.uiManager.prependUIBlock { _, viewRegistry in
-            let view = viewRegistry?[reactTag]
-            if !(view is RCTVideo) {
-                RCTLogError("Invalid view returned from registry, expecting RCTVideo, got: %@", String(describing: view))
-            } else if let view = view as? RCTVideo {
-                view.presentFullscreenPlayer()
-            }
-        }
+    @objc(setPlayerPauseStateCmd:paused:)
+    func setPlayerPauseStateCmd(_ reactTag: NSNumber, paused: Bool) {
+        performOnVideoView(withReactTag: reactTag, callback: { videoView in
+            videoView?.setPaused(paused)
+        })
     }
 
-    @objc(setPlayerPauseState:reactTag:)
-    func setPlayerPauseState(paused: NSNumber, reactTag: NSNumber) {
-        bridge.uiManager.prependUIBlock { _, viewRegistry in
-            let view = viewRegistry?[reactTag]
-            if !(view is RCTVideo) {
-                RCTLogError("Invalid view returned from registry, expecting RCTVideo, got: %@", String(describing: view))
-            } else if let view = view as? RCTVideo {
-                let paused = paused.boolValue
-                view.setPaused(paused)
-            }
-        }
+    @objc(setVolumeCmd:volume:)
+    func setVolumeCmd(_ reactTag: NSNumber, volume: Float) {
+        performOnVideoView(withReactTag: reactTag, callback: { videoView in
+            videoView?.setVolume(volume)
+        })
+    }
+
+    @objc(setFullScreenCmd:fullscreen:)
+    func setFullScreenCmd(_ reactTag: NSNumber, fullScreen: Bool) {
+        performOnVideoView(withReactTag: reactTag, callback: { videoView in
+            videoView?.setFullscreen(fullScreen)
+        })
+    }
+
+    @objc(save:options:resolve:reject:)
+    func save(_ reactTag: NSNumber, options: NSDictionary, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+        performOnVideoView(withReactTag: reactTag, callback: { videoView in
+            videoView?.save(options, resolve, reject)
+        })
+    }
+
+    @objc(getCurrentPosition:resolve:reject:)
+    func getCurrentPosition(_ reactTag: NSNumber, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+        performOnVideoView(withReactTag: reactTag, callback: { videoView in
+            videoView?.getCurrentPlaybackTime(resolve, reject)
+        })
     }
 
     override class func requiresMainQueueSetup() -> Bool {

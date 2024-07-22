@@ -77,6 +77,15 @@ getLicense: (spcString, contentId, licenseUrl, loadedLicenseUrl) => {
 };
 ```
 
+### `contentId`
+
+<PlatformsList types={['iOS']} />
+
+Type: string\
+Default: undefined
+
+Specify the content id of the stream, otherwise it will take the host value from `loadingRequest.request.URL.host` (f.e: `skd://testAsset` -> will take `testAsset`)
+
 ### `headers`
 
 <PlatformsList types={['Android', 'iOS']} />
@@ -110,6 +119,13 @@ Default: false
 
 The URL pointing to the licenseServer that will provide the authorization to play the protected stream.
 
+### `multiDrm`
+<PlatformsList types={['Android']} />
+Type: boolean\
+Default: false
+
+Indicates that drm system shall support key rotation, see: https://developer.android.google.cn/media/media3/exoplayer/drm?hl=en#key-rotation
+
 ### `type`
 
 <PlatformsList types={['Android', 'iOS']} />
@@ -120,15 +136,6 @@ Default: undefined
 You can specify the DRM type, either by string or using the exported DRMType enum.
 Valid values are, for Android: DRMType.WIDEVINE / DRMType.PLAYREADY / DRMType.CLEARKEY.
 for iOS: DRMType.FAIRPLAY
-
-### `contentId`
-
-<PlatformsList types={['iOS']} />
-
-Type: string\
-Default: undefined
-
-Specify the content id of the stream, otherwise it will take the host value from `loadingRequest.request.URL.host` (f.e: `skd://testAsset` -> will take `testAsset`)
 
 ## Common Usage Scenarios
 

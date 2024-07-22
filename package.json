@@ -1,21 +1,22 @@
 {
     "name": "react-native-video",
-    "version": "6.0.0-beta.6",
+    "version": "6.4.2",
     "description": "A <Video /> element for react-native",
     "main": "lib/index",
-    "source": "src/index",
+    "source": "src/index.ts",
     "react-native": "src/index",
     "license": "MIT",
     "author": "Community Contributors",
-    "homepage": "https://github.com/react-native-video/react-native-video#readme",
+    "homepage": "https://thewidlarzgroup.github.io/react-native-video/",
     "repository": {
         "type": "git",
-        "url": "git@github.com:react-native-video/react-native-video.git"
+        "url": "git@github.com:TheWidlarzGroup/react-native-video.git"
     },
     "resolutions": {
         "@types/react": "~18.0.0"
     },
     "devDependencies": {
+        "@expo/config-plugins": "^8.0.5",
         "@jamesacarr/eslint-formatter-github-actions": "^0.2.0",
         "@react-native/eslint-config": "^0.72.2",
         "@release-it/conventional-changelog": "^7.0.2",
@@ -48,6 +49,7 @@
         "test": "echo no test available",
         "check-ios": "scripts/swift-format.sh && scripts/swift-lint.sh && scripts/clang-format.sh",
         "check-android": "scripts/kotlin-lint.sh",
+        "check-all": "yarn check-android; yarn check-ios; yarn lint",
         "codegen": "node ./node_modules/react-native/scripts/generate-codegen-artifacts.js --path ./ ./output"
     },
     "files": [
@@ -57,6 +59,7 @@
         "src",
         "lib",
         "react-native-video.podspec",
+        "app.plugin.js",
         "!android/build",
         "!android/buildOutput_*",
         "!android/local.properties",
@@ -64,10 +67,5 @@
         "!**/*.tsbuildinfo",
         "!docs",
         "!examples"
-    ],
-    "codegenConfig": {
-        "name": "RNCVideo",
-        "type": "components",
-        "jsSrcsDir": "./src/specs"
-    }
+    ]
 }
